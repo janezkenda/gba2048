@@ -1,9 +1,6 @@
 package game
 
-import (
-	"fmt"
-	"math/rand"
-)
+import "math/rand"
 
 type Direction int
 
@@ -42,27 +39,6 @@ func NewGame() Game {
 	g.AddNewNumber()
 	g.AddNewNumber()
 	return g
-}
-
-func (g *Game) Print() {
-	fmt.Println("┌──────┬──────┬──────┬──────┐")
-	for x := 0; x < 4; x++ {
-		fmt.Print("│")
-		for y := 0; y < 4; y++ {
-			el := g.Board[Point{x, y}]
-
-			if el.Value == 0 {
-				fmt.Print("      ")
-			} else {
-				fmt.Printf(" %4d ", el.Value)
-			}
-			fmt.Print("│")
-		}
-		if x < 3 {
-			fmt.Println("\n├──────┼──────┼──────┼──────┤")
-		}
-	}
-	fmt.Println("\n└──────┴──────┴──────┴──────┘")
 }
 
 func (g *Game) AddNewNumber() {
@@ -223,14 +199,4 @@ func (g *Game) Move(d Direction) {
 			g.Board[Point{x, y}].Blocked = false
 		}
 	}
-}
-
-func (g *Game) GameOver() {
-	fmt.Println("Game Over!")
-	fmt.Println("Score: ", g.Score)
-}
-
-func (g *Game) GameWon() {
-	fmt.Println("You Won!")
-	fmt.Println("Score: ", g.Score)
 }
