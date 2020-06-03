@@ -11,45 +11,46 @@ const (
 	Right
 )
 
-type Point struct {
-	X, Y int
-}
+type (
+	Entry struct {
+		Value   int
+		Blocked bool
+	}
 
-type Entry struct {
-	Value   int
-	Blocked bool
-}
+	Game struct {
+		Board [4][4]*Entry
+		Score int
+		Moved bool
+		End   bool
+		Win   bool
+	}
+)
 
-type Game struct {
-	Board map[Point]*Entry
-	Score int
-	Moved bool
-	End   bool
-	Win   bool
-}
+func New() Game {
+	g := Game{
+		Board: [4][4]*Entry{},
+	}
 
-func NewGame() Game {
-	g := Game{Board: map[Point]*Entry{}}
-	for x := 0; x < 4; x++ {
-		for y := 0; y < 4; y++ {
-			g.Board[Point{x, y}] = &Entry{}
+	for x, l := range g.Board {
+		for y := range l {
+			g.Board[x][y] = &Entry{}
 		}
 	}
 
-	g.AddNewNumber()
-	g.AddNewNumber()
 	return g
 }
 
 func (g *Game) AddNewNumber() {
-	var zeroes []Point
+	type point struct {
+		x, y int
+	}
 
-	for x := 0; x < 4; x++ {
-		for y := 0; y < 4; y++ {
-			pt := Point{x, y}
-			el := g.Board[pt]
-			if el.Value == 0 {
-				zeroes = append(zeroes, pt)
+	var zeroes []point
+
+	for x, l := range g.Board {
+		for y := range l {
+			if g.Board[x][y].Value == 0 {
+				zeroes = append(zeroes, point{x, y})
 			}
 		}
 	}
@@ -65,9 +66,7 @@ func (g *Game) AddNewNumber() {
 
 	pt := zeroes[rand.Intn(len(zeroes))]
 
-	val := g.Board[pt]
-	val.Value = num
-	g.Board[pt] = val
+	g.Board[pt.x][pt.y].Value = num
 
 	if g.canMove() {
 		return
@@ -77,21 +76,21 @@ func (g *Game) AddNewNumber() {
 }
 
 func (g *Game) canMove() bool {
-	for x := 0; x < 4; x++ {
-		for y := 0; y < 4; y++ {
-			if g.Board[Point{x, y}].Value == 0 {
+	for x, l := range g.Board {
+		for y := range l {
+			if g.Board[x][y].Value == 0 {
 				return true
 			}
 		}
 	}
 
-	for x := 0; x < 4; x++ {
-		for y := 0; y < 4; y++ {
-			el := g.Board[Point{x, y}]
-			if g.testAdd(x+1, y, el.Value) ||
-				g.testAdd(x-1, y, el.Value) ||
-				g.testAdd(x, y+1, el.Value) ||
-				g.testAdd(x, y-1, el.Value) {
+	for x, l := range g.Board {
+		for y := range l {
+			val := g.Board[x][y].Value
+			if g.testAdd(x+1, y, val) ||
+				g.testAdd(x-1, y, val) ||
+				g.testAdd(x, y+1, val) ||
+				g.testAdd(x, y-1, val) {
 				return true
 			}
 		}
@@ -105,7 +104,7 @@ func (g *Game) testAdd(x, y, value int) bool {
 		return false
 	}
 
-	return g.Board[Point{x, y}].Value == value
+	return g.Board[x][y].Value == value
 }
 
 func (g *Game) mv(pt, other *Entry) {
@@ -135,13 +134,13 @@ func (g *Game) Move(d Direction) {
 	case Up:
 		for x := 0; x < 4; x++ {
 			for y := 1; y < 4; y++ {
-				if g.Board[Point{x, y}].Value == 0 {
+				if g.Board[x][y].Value == 0 {
 					continue
 				}
 
 				for i := y; i > 0; i-- {
-					pt := g.Board[Point{x, i}]
-					other := g.Board[Point{x, i - 1}]
+					pt := g.Board[x][i]
+					other := g.Board[x][i-1]
 
 					g.mv(pt, other)
 				}
@@ -150,13 +149,13 @@ func (g *Game) Move(d Direction) {
 	case Down:
 		for x := 0; x < 4; x++ {
 			for y := 2; y >= 0; y-- {
-				if g.Board[Point{x, y}].Value == 0 {
+				if g.Board[x][y].Value == 0 {
 					continue
 				}
 
 				for i := y; i < 3; i++ {
-					pt := g.Board[Point{x, i}]
-					other := g.Board[Point{x, i + 1}]
+					pt := g.Board[x][i]
+					other := g.Board[x][i+1]
 
 					g.mv(pt, other)
 				}
@@ -165,13 +164,13 @@ func (g *Game) Move(d Direction) {
 	case Left:
 		for y := 0; y < 4; y++ {
 			for x := 1; x < 4; x++ {
-				if g.Board[Point{x, y}].Value == 0 {
+				if g.Board[x][y].Value == 0 {
 					continue
 				}
 
 				for i := x; i > 0; i-- {
-					pt := g.Board[Point{i, y}]
-					other := g.Board[Point{i - 1, y}]
+					pt := g.Board[i][y]
+					other := g.Board[i-1][y]
 
 					g.mv(pt, other)
 				}
@@ -180,13 +179,13 @@ func (g *Game) Move(d Direction) {
 	case Right:
 		for y := 0; y < 4; y++ {
 			for x := 2; x >= 0; x-- {
-				if g.Board[Point{x, y}].Value == 0 {
+				if g.Board[x][y].Value == 0 {
 					continue
 				}
 
 				for i := x; i < 3; i++ {
-					pt := g.Board[Point{i, y}]
-					other := g.Board[Point{i + 1, y}]
+					pt := g.Board[i][y]
+					other := g.Board[i+1][y]
 
 					g.mv(pt, other)
 				}
@@ -194,9 +193,9 @@ func (g *Game) Move(d Direction) {
 		}
 	}
 
-	for x := 0; x < 4; x++ {
-		for y := 0; y < 4; y++ {
-			g.Board[Point{x, y}].Blocked = false
+	for x, l := range g.Board {
+		for y := range l {
+			g.Board[x][y].Blocked = false
 		}
 	}
 }

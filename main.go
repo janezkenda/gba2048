@@ -32,7 +32,7 @@ var gradient = append(
 func printField(g game.Game, m3 *display.Mode3) {
 	for x := 0; x < 4; x++ {
 		for y := 0; y < 4; y++ {
-			el := g.Board[game.Point{X: x, Y: y}]
+			el := g.Board[x][y]
 
 			size := 37
 			xbase, ybase := 43, 3
@@ -62,7 +62,9 @@ func main() {
 	m3.Fill(display.ClrWhite)
 	m3.Frame(41, 1, 200, 160, display.ClrBlack)
 
-	g := game.NewGame()
+	g := game.New()
+	g.AddNewNumber()
+	g.AddNewNumber()
 	printField(g, m3)
 
 	for {
